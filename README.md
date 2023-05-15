@@ -29,6 +29,7 @@ the window.
 4. Obstacle detection implementation is required, with a push button used to indicate jamming instead of a sensor.
 
 The desired area to be controlled is shown in the following figure:
+
 ![image](https://github.com/AssemEl-Barky/CSE411-Major-Task-Powerwindowcontrolsystem-using-Tiva-C-running-FreeRTOS-by-Team-4-MCTA/assets/63543410/9b763744-29bb-4c17-afda-add8a0d02ada)
 
 ### System basic features
