@@ -131,8 +131,8 @@ int main()
   xTaskCreate(driver_automatic_down,"driver_automatic_down",80,NULL,2,NULL);
   xTaskCreate(passenger_manual_up,"passenger_manual_up",80,NULL,1,NULL);
   xTaskCreate(passenger_manual_down,"passenger_manual_down",80,NULL,1,NULL);
-  xTaskCreate(passenger_automatic_up,"passenger_automatic_up",80,NULL,2,NULL);
-  xTaskCreate(passenger_automatic_down,"passenger_automatic_down",80,NULL,2,NULL);
+  xTaskCreate(passenger_automatic_up,"passenger_automatic_up",80,NULL,1,NULL);
+  xTaskCreate(passenger_automatic_down,"passenger_automatic_down",80,NULL,1,NULL);
   xTaskCreate(jamming,"jamming",80,NULL,2,NULL);
   xTaskCreate(lock,"lock_passenger",80,NULL,2,NULL);
 	
@@ -428,6 +428,7 @@ void driver_automatic_down (void *params)
 	for(;;)
 	{
 		xSemaphoreTake (S_driver_automatic_down, portMAX_DELAY);
+		xSemaphoreTake(MotorMutex, portMAX_DELAY);
 		GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_1,0x00); //Turn the motor on
 		GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_2,GPIO_PIN_2);
 		while(GPIOPinRead(GPIO_PORTC_BASE,GPIO_PIN_4) ==  GPIO_PIN_4) //Keep the motor on as long as the corresponding limit switch is not reached
@@ -437,6 +438,7 @@ void driver_automatic_down (void *params)
 			
 		GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_1,0x00); //Turn the motor off
 	  GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_2,0x00);
+   	  xSemaphoreGive(MotorMutex);
 	}
 	}
 void passenger_automatic_up (void *params)
@@ -445,7 +447,7 @@ void passenger_automatic_up (void *params)
 	for(;;)
 	{
 		xSemaphoreTake (S_passenger_automatic_up, portMAX_DELAY);
-		xSemaphoreTake(MotorMutex, portMAX_DELAY);
+		//xSemaphoreTake(MotorMutex, portMAX_DELAY);//Mutex is not given to the passenger's manual task so that the priority resides with the driver
 		GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_1,GPIO_PIN_1); //Turn on the motor
 		GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_2,0x00);
 			while(GPIOPinRead(GPIO_PORTC_BASE,GPIO_PIN_5) ==  GPIO_PIN_5) //Keep the motor on as long as the corresponding limit switch is not reached
@@ -470,7 +472,7 @@ void passenger_automatic_up (void *params)
 			}
 		GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_1,0x00); // Turn off the motor
 	  GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_2,0x00);
-		xSemaphoreGive(MotorMutex);
+		//xSemaphoreGive(MotorMutex);
 	}
 	}
 void passenger_automatic_down (void *params)
@@ -479,6 +481,7 @@ void passenger_automatic_down (void *params)
 	for(;;)
 	{
 		xSemaphoreTake (S_passenger_automatic_down, portMAX_DELAY);
+		//xSemaphoreTake(MotorMutex, portMAX_DELAY);//Mutex is not given to the passenger's manual task so that the priority resides with the driver
 		GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_1,0x00); //Turn on the motor
 		GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_2,GPIO_PIN_2);
 				while(GPIOPinRead(GPIO_PORTC_BASE,GPIO_PIN_4) ==  GPIO_PIN_4) //Keep the motor on as long as the corresponding limit switch is not reached
@@ -487,6 +490,7 @@ void passenger_automatic_down (void *params)
 			}	
 		GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_1,0x00); //Turn off the motor
 	  GPIOPinWrite(GPIO_PORTE_BASE, GPIO_PIN_2,0x00);
+	  //xSemaphoreGive(MotorMutex);	
 	}
 	}
 void lock(void *params)
